@@ -28,6 +28,15 @@ const products: Product[] = [
     description: "Sabonete artesanal com padrão tie-dye em tons de azul e teal. Feito com óleos essenciais puros.",
     isFavorite: false,
   },
+  {
+    id: "2",
+    name: "Vermelho do Amor",
+    price: 7.0,
+    image: "/images/sabonete_vermelho_do_amor.png",
+    category: "sabonetes",
+    description: "Sabonete artesanal em tons vibrantes de vermelho e rosa. Perfeito para presentear quem você ama.",
+    isFavorite: false,
+  },
 ];
 
 export default function Catalog() {
