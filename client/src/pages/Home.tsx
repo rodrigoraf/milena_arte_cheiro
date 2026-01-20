@@ -28,12 +28,12 @@ export default function Home() {
             <a href="#sobre" className="text-foreground hover:text-primary transition-colors">
               Sobre
             </a>
-            <a href="#contato" className="text-foreground hover:text-primary transition-colors">
+            <a href="/contact" className="text-foreground hover:text-primary transition-colors">
               Contato
             </a>
           </nav>
           <Button className="bg-primary hover:bg-primary/90 text-foreground">
-            Saiba Mais
+            <a href="/contact">Saiba Mais</a>
           </Button>
         </div>
       </header>
@@ -54,13 +54,13 @@ export default function Home() {
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button className="bg-primary hover:bg-primary/90 text-foreground px-8 py-6 text-base">
-                Explorar Coleção
+                <a href="#produtos">Explorar Coleção</a>
               </Button>
               <Button
                 variant="outline"
                 className="border-border hover:bg-muted px-8 py-6 text-base"
               >
-                Ver Catálogo
+                <a href="/contact">Fale Conosco</a>
               </Button>
             </div>
             <div className="flex items-center gap-6 pt-4">
@@ -190,7 +190,7 @@ export default function Home() {
             Explore nossa coleção completa e encontre o aroma perfeito para você.
           </p>
           <Button className="bg-primary hover:bg-primary/90 text-foreground px-10 py-6 text-base">
-            Ver Todos os Produtos
+            <a href="/contact">Entrar em Contato</a>
           </Button>
         </div>
       </section>
@@ -210,7 +210,7 @@ export default function Home() {
               <ul className="space-y-2 text-sm text-foreground/60">
                 <li><a href="#produtos" className="hover:text-primary transition-colors">Produtos</a></li>
                 <li><a href="#sobre" className="hover:text-primary transition-colors">Sobre</a></li>
-                <li><a href="#contato" className="hover:text-primary transition-colors">Contato</a></li>
+                <li><a href="/contact" className="hover:text-primary transition-colors">Contato</a></li>
               </ul>
             </div>
             <div>
