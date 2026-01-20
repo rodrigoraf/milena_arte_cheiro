@@ -1,3 +1,4 @@
+import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Heart, Leaf, Sparkles } from "lucide-react";
 
@@ -9,6 +10,10 @@ import { Heart, Leaf, Sparkles } from "lucide-react";
  */
 
 export default function Home() {
+  // The userAuth hooks provides authentication state
+  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
+  let { user, loading, error, isAuthenticated, logout } = useAuth();
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}

@@ -4,9 +4,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useState } from "react";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
 /**
  * Design: Minimalismo Botânico Contemporâneo
@@ -24,7 +24,6 @@ const contactSchema = z.object({
 type ContactFormData = z.infer<typeof contactSchema>;
 
 export default function Contact() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     register,
     handleSubmit,
@@ -34,24 +33,18 @@ export default function Contact() {
     resolver: zodResolver(contactSchema),
   });
 
-  const onSubmit = async (data: ContactFormData) => {
-    setIsSubmitting(true);
-    try {
-      // Simular envio de e-mail
-      // Em produção, isso seria integrado com um serviço de e-mail real
-      console.log("Formulário enviado:", data);
-      
-      // Simular delay de envio
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
+  const sendMessageMutation = trpc.contact.sendMessage.useMutation({
+    onSuccess: () => {
       toast.success("Mensagem enviada com sucesso! Entraremos em contato em breve.");
       reset();
-    } catch (error) {
-      toast.error("Erro ao enviar mensagem. Tente novamente.");
-      console.error(error);
-    } finally {
-      setIsSubmitting(false);
-    }
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao enviar mensagem. Tente novamente.");
+    },
+  });
+
+  const onSubmit = async (data: ContactFormData) => {
+    sendMessageMutation.mutate(data);
   };
 
   return (
@@ -243,10 +236,10 @@ export default function Contact() {
               <div className="flex gap-4">
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={sendMessageMutation.isPending}
                   className="bg-primary hover:bg-primary/90 text-foreground px-8 py-3"
                 >
-                  {isSubmitting ? "Enviando..." : "Enviar Mensagem"}
+                  {sendMessageMutation.isPending ? "Enviando..." : "Enviar Mensagem"}
                 </Button>
                 <Button
                   type="button"
