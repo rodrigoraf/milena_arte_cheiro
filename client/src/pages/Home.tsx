@@ -216,7 +216,7 @@ export default function Home() {
             <div>
               <h4 className="font-semibold text-foreground mb-4">Contato</h4>
               <p className="text-sm text-foreground/60">
-                Email: contato@milenaartecheiro.com
+                Email: milena.maaf@gmail.com
               </p>
             </div>
           </div>
