@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 
@@ -118,12 +118,18 @@ export default function Contact() {
                 </div>
 
                 <div className="flex gap-4">
-                  <Phone className="w-6 h-6 text-secondary flex-shrink-0 mt-1" />
+                  <MessageCircle className="w-6 h-6 text-secondary flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="font-semibold text-foreground mb-1">Telefone</h3>
-                    <p className="text-foreground/70">
-                      Disponível para contato via WhatsApp
-                    </p>
+                    <h3 className="font-semibold text-foreground mb-1">WhatsApp</h3>
+                    <a
+                      href="https://wa.me/5511987654321?text=Olá%20Milena!%20Gostaria%20de%20saber%20mais%20sobre%20seus%20produtos%20artesanais."
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-foreground/70 hover:text-primary transition-colors inline-flex items-center gap-2"
+                    >
+                      Clique aqui para conversar
+                      <span className="text-sm">→</span>
+                    </a>
                   </div>
                 </div>
 
@@ -141,15 +147,32 @@ export default function Contact() {
               </div>
             </div>
 
-            <div className="bg-muted p-6 rounded-lg">
-              <h3 className="font-semibold text-foreground mb-3">Horário de Atendimento</h3>
-              <p className="text-sm text-foreground/70">
-                Segunda a Sexta: 9h às 18h
-                <br />
-                Sábado: 10h às 14h
-                <br />
-                Domingo: Fechado
-              </p>
+            <div className="space-y-4">
+              <div className="bg-muted p-6 rounded-lg">
+                <h3 className="font-semibold text-foreground mb-3">Horário de Atendimento</h3>
+                <p className="text-sm text-foreground/70">
+                  Segunda a Sexta: 9h às 18h
+                  <br />
+                  Sábado: 10h às 14h
+                  <br />
+                  Domingo: Fechado
+                </p>
+              </div>
+              
+              <Button
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-lg transition-colors"
+                asChild
+              >
+                <a
+                  href="https://wa.me/5511987654321?text=Olá%20Milena!%20Gostaria%20de%20saber%20mais%20sobre%20seus%20produtos%20artesanais."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Contato via WhatsApp
+                </a>
+              </Button>
             </div>
           </div>
 
