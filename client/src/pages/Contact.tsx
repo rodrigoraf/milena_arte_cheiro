@@ -122,7 +122,7 @@ export default function Contact() {
                   <div>
                     <h3 className="font-semibold text-foreground mb-1">WhatsApp</h3>
                     <a
-                      href="https://wa.me/5511987654321?text=Olá%20Milena!%20Gostaria%20de%20saber%20mais%20sobre%20seus%20produtos%20artesanais."
+                      href="https://wa.me/5561914792010?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20seus%20produtos%20artesanais."
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-foreground/70 hover:text-primary transition-colors inline-flex items-center gap-2"
@@ -164,7 +164,7 @@ export default function Contact() {
                 asChild
               >
                 <a
-                  href="https://wa.me/5511987654321?text=Olá%20Milena!%20Gostaria%20de%20saber%20mais%20sobre%20seus%20produtos%20artesanais."
+                  href="https://wa.me/5561914792010?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20seus%20produtos%20artesanais."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2"
