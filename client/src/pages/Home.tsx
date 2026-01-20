@@ -22,8 +22,8 @@ export default function Home() {
             />
           </div>
           <nav className="hidden md:flex items-center gap-8">
-            <a href="#produtos" className="text-foreground hover:text-primary transition-colors">
-              Produtos
+            <a href="/catalog" className="text-foreground hover:text-primary transition-colors">
+              Catálogo
             </a>
             <a href="#sobre" className="text-foreground hover:text-primary transition-colors">
               Sobre
@@ -54,7 +54,7 @@ export default function Home() {
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button className="bg-primary hover:bg-primary/90 text-foreground px-8 py-6 text-base">
-                <a href="#produtos">Explorar Coleção</a>
+                <a href="/catalog">Explorar Catálogo</a>
               </Button>
               <Button
                 variant="outline"
@@ -208,7 +208,7 @@ export default function Home() {
             <div>
               <h4 className="font-semibold text-foreground mb-4">Links</h4>
               <ul className="space-y-2 text-sm text-foreground/60">
-                <li><a href="#produtos" className="hover:text-primary transition-colors">Produtos</a></li>
+                <li><a href="/catalog" className="hover:text-primary transition-colors">Catálogo</a></li>
                 <li><a href="#sobre" className="hover:text-primary transition-colors">Sobre</a></li>
                 <li><a href="/contact" className="hover:text-primary transition-colors">Contato</a></li>
               </ul>
