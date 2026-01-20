@@ -138,9 +138,11 @@ export default function Contact() {
                   <div>
                     <h3 className="font-semibold text-foreground mb-1">Localização</h3>
                     <p className="text-foreground/70">
-                      Milena Arte e Cheiro Ltda.
+                      Milena Arte & Cheiro Ltda
                       <br />
-                      Brasil
+                      Águas Claras
+                      <br />
+                      Brasília - DF
                     </p>
                   </div>
                 </div>
