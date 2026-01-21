@@ -1,4 +1,4 @@
-import { db } from "./server/db";
+import { getDb } from "./server/db";
 import { products } from "./drizzle/schema";
 
 const seedProducts = [
@@ -18,6 +18,7 @@ const seedProducts = [
 
 async function seed() {
   console.log("Seeding products...");
+  const db = await getDb();
   for (const product of seedProducts) {
     await db.insert(products).values(product);
   }

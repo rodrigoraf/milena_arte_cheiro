@@ -1,13 +1,1 @@
-{
-  "version": "7",
-  "dialect": "mysql",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "5",
-      "when": 1768937718960,
-      "tag": "0000_steady_pixie",
-      "breakpoints": true
-    }
-  ]
-}
+{"version":"7","dialect":"sqlite","entries":[]}
