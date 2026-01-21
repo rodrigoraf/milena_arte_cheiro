@@ -210,13 +210,20 @@ export default function Catalog() {
                     </div>
 
                     {/* Add to Cart Button */}
-                    <Button
-                      onClick={() => addToCart(product)}
-                      className="w-full bg-primary hover:bg-primary/90 text-foreground py-3"
-                    >
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      Adicionar ao Carrinho
-                    </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => addToCart(product)}
+                  className="flex-1 bg-primary hover:bg-primary/90 text-foreground py-3"
+                >
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  Adicionar
+                </Button>
+                <a href="/checkout" className="flex-1">
+                  <Button className="w-full bg-secondary hover:bg-secondary/90 text-foreground py-3">
+                    Checkout
+                  </Button>
+                </a>
+              </div>
                   </div>
                 </div>
               ))}
