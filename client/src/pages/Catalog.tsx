@@ -2,73 +2,54 @@ import { Button } from "@/components/ui/button";
 import { ShoppingCart, Heart } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
+import { Helmet } from "react-helmet-async";
 
 /**
  * Design: Minimalismo Botânico Contemporâneo
  * Página de Catálogo com produtos funcionais
  */
 
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  category: "sabonetes" | "velas";
-  description: string;
-  isFavorite?: boolean;
-}
-
-const products: Product[] = [
-  {
-    id: "1",
-    name: "Azul Tye-Dye",
-    price: 10.0,
-    image: "/images/sabonete_azul_tye_dye.png",
-    category: "sabonetes",
-    description: "Sabonete artesanal com padrão tie-dye em tons de azul e teal. Feito com óleos essenciais puros.",
-    isFavorite: false,
-  },
-  {
-    id: "2",
-    name: "Vermelho do Amor",
-    price: 7.0,
-    image: "/images/sabonete_vermelho_do_amor.png",
-    category: "sabonetes",
-    description: "Sabonete artesanal em tons vibrantes de vermelho e rosa. Perfeito para presentear quem você ama.",
-    isFavorite: false,
-  },
-];
-
 export default function Catalog() {
-  const [cart, setCart] = useState<Product[]>([]);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
-  const [selectedCategory, setSelectedCategory] = useState<"todos" | "sabonetes" | "velas">("todos");
+  const { data: products, isLoading } = trpc.products.list.useQuery();
+  const [cart, setCart] = useState<any[]>([]);
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
 
-  const filteredProducts = selectedCategory === "todos" 
-    ? products 
-    : products.filter(p => p.category === selectedCategory);
+  const totalPrice = cart.reduce((sum, item) => sum + (item.price / 100), 0);
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: any) => {
     setCart([...cart, product]);
     toast.success(`${product.name} adicionado ao carrinho!`);
   };
 
-  const toggleFavorite = (productId: string) => {
-    const newFavorites = new Set(favorites);
-    if (newFavorites.has(productId)) {
-      newFavorites.delete(productId);
-      toast.info("Removido dos favoritos");
-    } else {
-      newFavorites.add(productId);
-      toast.success("Adicionado aos favoritos!");
-    }
-    setFavorites(newFavorites);
+  const toggleFavorite = (id: number) => {
+    setFavorites(prev => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(id)) {
+        newFavorites.delete(id);
+      } else {
+        newFavorites.add(id);
+      }
+      return newFavorites;
+    });
   };
 
-  const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
+  }
 
   return (
-    <div className="min-h-screen bg-white">
+    <>
+      <Helmet>
+        <title>Catálogo - Milena Arte e Cheiro</title>
+        <meta name="description" content="Explore nosso catálogo completo de sabonetes artesanais. Produtos feitos à mão com fragrâncias únicas e designs criativos." />
+        <meta name="keywords" content="catálogo, sabonetes artesanais, produtos, fragrâncias, handmade" />
+        <meta property="og:title" content="Catálogo - Milena Arte e Cheiro" />
+        <meta property="og:description" content="Sabonetes artesanais feitos com amor." />
+        <meta property="og:url" content="https://rodrigoraf.github.io/milena_arte_cheiro/catalog" />
+        <link rel="canonical" href="https://rodrigoraf.github.io/milena_arte_cheiro/catalog" />
+      </Helmet>
+      <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b border-border">
         <div className="container flex items-center justify-between h-20">
@@ -119,52 +100,18 @@ export default function Catalog() {
         </div>
       </section>
 
-      {/* Divider */}
-      <div className="container">
-        <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-      </div>
-
-      {/* Filters */}
-      <section className="py-8">
-        <div className="container">
-          <div className="flex gap-4 justify-center flex-wrap">
-            <Button
-              variant={selectedCategory === "todos" ? "default" : "outline"}
-              onClick={() => setSelectedCategory("todos")}
-              className={selectedCategory === "todos" ? "bg-primary hover:bg-primary/90" : ""}
-            >
-              Todos os Produtos
-            </Button>
-            <Button
-              variant={selectedCategory === "sabonetes" ? "default" : "outline"}
-              onClick={() => setSelectedCategory("sabonetes")}
-              className={selectedCategory === "sabonetes" ? "bg-primary hover:bg-primary/90" : ""}
-            >
-              Sabonetes
-            </Button>
-            <Button
-              variant={selectedCategory === "velas" ? "default" : "outline"}
-              onClick={() => setSelectedCategory("velas")}
-              className={selectedCategory === "velas" ? "bg-primary hover:bg-primary/90" : ""}
-            >
-              Velas
-            </Button>
-          </div>
-        </div>
-      </section>
-
       {/* Products Grid */}
       <section className="py-12 lg:py-16">
         <div className="container">
-          {filteredProducts.length === 0 ? (
+          {!(products || []).length ? (
             <div className="text-center py-12">
               <p className="text-lg text-foreground/60">
-                Nenhum produto encontrado nesta categoria. Em breve teremos mais!
+                Nenhum produto encontrado. Em breve teremos mais!
               </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredProducts.map((product) => (
+              {(products || []).map((product) => (
                 <div
                   key={product.id}
                   className="bg-white rounded-lg border border-border overflow-hidden hover:shadow-lg transition-shadow duration-300"
@@ -172,7 +119,7 @@ export default function Catalog() {
                   {/* Product Image */}
                   <div className="relative bg-muted h-80 flex items-center justify-center overflow-hidden group">
                     <img
-                      src={product.image}
+                      src={product.image || "/images/placeholder.png"}
                       alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
@@ -202,10 +149,7 @@ export default function Catalog() {
                     {/* Price */}
                     <div className="flex items-baseline gap-2 mb-6">
                       <span className="text-3xl font-bold text-primary">
-                        R$ {product.price.toFixed(2)}
-                      </span>
-                      <span className="text-sm text-foreground/50">
-                        {product.category === "sabonetes" ? "por unidade" : "por vela"}
+                        R$ {(product.price / 100).toFixed(2)}
                       </span>
                     </div>
 
@@ -323,5 +267,6 @@ export default function Catalog() {
         </div>
       </footer>
     </div>
+    </>
   );
 }

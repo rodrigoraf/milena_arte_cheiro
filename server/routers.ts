@@ -6,6 +6,9 @@ import { z } from "zod";
 import { notifyOwner } from "./_core/notification";
 import Stripe from "stripe";
 import { PRODUCTS } from "./products";
+import { getDb } from "./db";
+import { products, cartItems } from "../drizzle/schema";
+import { eq, and } from "drizzle-orm";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
   apiVersion: "2025-12-15.clover",
@@ -69,14 +72,91 @@ ${input.message}
       }),
   }),
 
-  // Checkout and payment routers
-  checkout: router({
+  // Products router
+  products: router({
+    list: publicProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return [];
+      return await db.select().from(products);
+    }),
+    get: publicProcedure
+      .input(z.object({ id: z.number() }))
+      .query(async ({ input }) => {
+        const db = await getDb();
+        if (!db) return null;
+        const [product] = await db.select().from(products).where(eq(products.id, input.id));
+        return product;
+      }),
+  }),
+
+  // Cart router
+  cart: router({
+    get: protectedProcedure.query(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) return [];
+      return await db
+        .select({
+          id: cartItems.id,
+          quantity: cartItems.quantity,
+          product: products,
+        })
+        .from(cartItems)
+        .innerJoin(products, eq(cartItems.productId, products.id))
+        .where(eq(cartItems.userId, ctx.user.id));
+    }),
+    add: protectedProcedure
+      .input(z.object({ productId: z.number(), quantity: z.number().min(1) }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        const existing = await db
+          .select()
+          .from(cartItems)
+          .where(and(eq(cartItems.userId, ctx.user.id), eq(cartItems.productId, input.productId)));
+
+        if (existing.length > 0) {
+          await db
+            .update(cartItems)
+            .set({ quantity: existing[0].quantity + input.quantity })
+            .where(eq(cartItems.id, existing[0].id));
+        } else {
+          await db.insert(cartItems).values({
+            userId: ctx.user.id,
+            productId: input.productId,
+            quantity: input.quantity,
+          });
+        }
+        return { success: true };
+      }),
+    update: protectedProcedure
+      .input(z.object({ productId: z.number(), quantity: z.number().min(0) }))
+      .mutation(async ({ input, ctx }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        if (input.quantity === 0) {
+          await db
+            .delete(cartItems)
+            .where(and(eq(cartItems.userId, ctx.user.id), eq(cartItems.productId, input.productId)));
+        } else {
+          await db
+            .update(cartItems)
+            .set({ quantity: input.quantity })
+            .where(and(eq(cartItems.userId, ctx.user.id), eq(cartItems.productId, input.productId)));
+        }
+        return { success: true };
+      }),
+    clear: protectedProcedure.mutation(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error("Database not available");
+      await db.delete(cartItems).where(eq(cartItems.userId, ctx.user.id));
+      return { success: true };
+    }),
     createSession: publicProcedure
       .input(
         z.object({
           items: z.array(
             z.object({
-              productId: z.string(),
+              productId: z.number(),
               quantity: z.number().min(1),
             })
           ),
@@ -86,26 +166,30 @@ ${input.message}
       )
       .mutation(async ({ input, ctx }) => {
         try {
+          const db = await getDb();
+          if (!db) throw new Error("Database not available");
           // Build line items for Stripe
-          const lineItems = input.items.map((item) => {
-            const product = PRODUCTS[item.productId as keyof typeof PRODUCTS];
-            if (!product) {
-              throw new Error(`Produto não encontrado: ${item.productId}`);
-            }
+          const lineItems = await Promise.all(
+            input.items.map(async (item) => {
+              const [product] = await db.select().from(products).where(eq(products.id, item.productId));
+              if (!product) {
+                throw new Error(`Produto não encontrado: ${item.productId}`);
+              }
 
-            return {
-              price_data: {
-                currency: "brl",
-                product_data: {
-                  name: product.name,
-                  description: product.description,
-                  images: [product.image],
+              return {
+                price_data: {
+                  currency: "brl",
+                  product_data: {
+                    name: product.name,
+                    description: product.description || undefined,
+                    images: product.image ? [product.image] : [],
+                  },
+                  unit_amount: product.price,
                 },
-                unit_amount: product.price,
-              },
-              quantity: item.quantity,
-            };
-          });
+                quantity: item.quantity,
+              };
+            })
+          );
 
           // Create checkout session
           const session = await stripe.checkout.sessions.create({

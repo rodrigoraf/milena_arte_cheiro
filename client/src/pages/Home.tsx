@@ -1,6 +1,7 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Heart, Leaf, Sparkles } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 
 /**
  * Design: Minimalismo Botânico Contemporâneo
@@ -15,7 +16,18 @@ export default function Home() {
   let { user, loading, error, isAuthenticated, logout } = useAuth();
 
   return (
-    <div className="min-h-screen bg-white">
+    <>
+      <Helmet>
+        <title>Milena Arte e Cheiro - Sabonetes Artesanais</title>
+        <meta name="description" content="Descubra sabonetes artesanais feitos à mão com ingredientes naturais. Perfumes únicos e designs criativos para presentear ou usar no dia a dia." />
+        <meta name="keywords" content="sabonetes artesanais, produtos naturais, fragrâncias, presentes, handmade soap" />
+        <meta property="og:title" content="Milena Arte e Cheiro - Sabonetes Artesanais" />
+        <meta property="og:description" content="Sabonetes artesanais feitos com amor e ingredientes naturais." />
+        <meta property="og:image" content="/images/logo_milena.png" />
+        <meta property="og:url" content="https://rodrigoraf.github.io/milena_arte_cheiro/" />
+        <link rel="canonical" href="https://rodrigoraf.github.io/milena_arte_cheiro/" />
+      </Helmet>
+      <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b border-border">
         <div className="container flex items-center justify-between h-20">
@@ -233,5 +245,6 @@ export default function Home() {
         </div>
       </footer>
     </div>
+    </>
   );
 }
