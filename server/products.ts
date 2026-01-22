@@ -16,6 +16,12 @@ export const PRODUCTS = {
     price: 700, // R$ 7.00 em centavos
     image: "/images/sabonete_vermelho_do_amor.png",
   },
+  SABONETE_CORACAO_AZUL: {
+    name: "Sabão em forma de coração - azul",
+    description: "Sabão artesanal em formato de coração com cor azul turquesa vibrante. Perfeito para presentear ou usar no dia a dia. Feito com ingredientes naturais e óleos essenciais.",
+    price: 1000, // R$ 10.00 em centavos
+    image: "/images/sabonete_coracao_azul.png",
+  },
 } as const;
 
 export type ProductKey = keyof typeof PRODUCTS;
