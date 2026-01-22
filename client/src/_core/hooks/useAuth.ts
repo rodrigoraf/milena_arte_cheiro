@@ -16,6 +16,12 @@ export function useAuth(options?: UseAuthOptions) {
   const meQuery = trpc.auth.me.useQuery(undefined, {
     retry: false,
     refetchOnWindowFocus: false,
+    onError: (error) => {
+      // Silenciar erros de rede quando não há backend
+      if (error instanceof TRPCClientError && error.message.includes('fetch')) {
+        console.warn('Auth not available - running in static mode');
+      }
+    },
   });
 
   const logoutMutation = trpc.auth.logout.useMutation({

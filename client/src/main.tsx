@@ -46,6 +46,10 @@ const trpcClient = trpc.createClient({
         return globalThis.fetch(input, {
           ...(init ?? {}),
           credentials: "include",
+        }).catch((error) => {
+          // Silenciar erros de rede quando não há backend
+          console.warn('TRPC not available - running in static mode');
+          throw error;
         });
       },
     }),

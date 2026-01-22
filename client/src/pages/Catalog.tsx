@@ -11,11 +11,28 @@ import { trpc } from "@/lib/trpc";
  */
 
 export default function Catalog() {
-  const { data: products, isLoading } = trpc.products.list.useQuery();
-  const [cart, setCart] = useState<any[]>([]);
-  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const { data: products, isLoading, error } = trpc.products.list.useQuery();
+  
+  // Fallback para dados locais se a API falhar
+  const fallbackProducts = [
+    {
+      id: 1,
+      name: "Sabonete Azul Tye-Dye",
+      description: "Sabonete artesanal com padrão tie-dye em tons de azul. Feito com ingredientes naturais e óleos essenciais puros.",
+      price: 1000, // em centavos
+      image: "/images/sabonete_azul_tye_dye.png",
+    },
+    {
+      id: 2,
+      name: "Sabonete Vermelho do Amor",
+      description: "Sabonete artesanal em tons de vermelho com fragrância envolvente. Ideal para presentear ou usar no dia a dia.",
+      price: 700, // em centavos
+      image: "/images/sabonete_vermelho_do_amor.png",
+    },
+  ];
 
-  const totalPrice = cart.reduce((sum, item) => sum + (item.price / 100), 0);
+  const displayProducts = products || fallbackProducts;
+  const isLoadingProducts = isLoading && !products;
 
   const addToCart = (product: any) => {
     setCart([...cart, product]);
@@ -34,7 +51,7 @@ export default function Catalog() {
     });
   };
 
-  if (isLoading) {
+  if (isLoadingProducts) {
     return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
   }
 
