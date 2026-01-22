@@ -8,7 +8,6 @@ import Home from "./pages/Home";
 import Contact from "./pages/Contact";
 import Catalog from "./pages/Catalog";
 import Checkout from "./pages/Checkout";
-import { HelmetProvider } from "react-helmet-async";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -32,16 +31,14 @@ function Router() {
 
 function App() {
   return (
-    <HelmetProvider>
-      <ErrorBoundary>
-        <ThemeProvider defaultTheme="light">
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
-        </ThemeProvider>
-      </ErrorBoundary>
-    </HelmetProvider>
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="light">
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

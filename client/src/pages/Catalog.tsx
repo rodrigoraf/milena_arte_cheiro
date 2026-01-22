@@ -3,7 +3,7 @@ import { ShoppingCart, Heart } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
-import { Helmet } from "react-helmet-async";
+
 
 /**
  * Design: Minimalismo Botânico Contemporâneo
@@ -39,17 +39,7 @@ export default function Catalog() {
   }
 
   return (
-    <>
-      <Helmet>
-        <title>Catálogo - Milena Arte e Cheiro</title>
-        <meta name="description" content="Explore nosso catálogo completo de sabonetes artesanais. Produtos feitos à mão com fragrâncias únicas e designs criativos." />
-        <meta name="keywords" content="catálogo, sabonetes artesanais, produtos, fragrâncias, handmade" />
-        <meta property="og:title" content="Catálogo - Milena Arte e Cheiro" />
-        <meta property="og:description" content="Sabonetes artesanais feitos com amor." />
-        <meta property="og:url" content="https://rodrigoraf.github.io/milena_arte_cheiro/catalog" />
-        <link rel="canonical" href="https://rodrigoraf.github.io/milena_arte_cheiro/catalog" />
-      </Helmet>
-      <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white border-b border-border">
         <div className="container flex items-center justify-between h-20">
@@ -267,6 +257,5 @@ export default function Catalog() {
         </div>
       </footer>
     </div>
-    </>
   );
 }
