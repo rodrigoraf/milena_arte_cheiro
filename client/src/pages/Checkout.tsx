@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Loader2, Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
 interface CartItem {
@@ -25,6 +25,11 @@ const PRODUCTS = {
     price: 700,
     image: "/images/sabonete_vermelho_do_amor.png",
   },
+  SABAO_CORACAO_AZUL: {
+    name: "Sabão em forma de coração - azul",
+    price: 1000,
+    image: "/images/sabonete_coracao_azul.png",
+  },
 };
 
 export default function Checkout() {
@@ -33,13 +38,6 @@ export default function Checkout() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-
-  // Tentar usar TRPC se disponível, senão usar fallback
-  const createSessionMutation = trpc.checkout.createSession.useMutation({
-    onSuccess: (data) => {
-      window.location.href = data.sessionUrl;
-    }
-  });
 
   const addToCart = (productId: string) => {
     const product = PRODUCTS[productId as keyof typeof PRODUCTS];
@@ -68,6 +66,10 @@ export default function Checkout() {
     toast.success(`${product.name} adicionado ao carrinho!`);
   };
 
+  const removeFromCart = (productId: string) => {
+    setCart((prevCart) => prevCart.filter((item) => item.productId !== productId));
+  };
+
   const updateQuantity = (productId: string, quantity: number) => {
     if (quantity <= 0) {
       removeFromCart(productId);
@@ -80,56 +82,30 @@ export default function Checkout() {
     );
   };
 
-  const removeFromCart = (productId: string) => {
-    setCart((prevCart) =>
-      prevCart.filter((item) => item.productId !== productId)
-    );
-    toast.success("Produto removido do carrinho");
-  };
-
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const totalFormatted = (total / 100).toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  });
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const shipping = subtotal > 0 ? 1200 : 0; // R$ 12.00 de frete
+  const total = subtotal + shipping;
 
   const handleCheckout = async () => {
-    if (cart.length === 0) {
-      toast.error("Carrinho vazio. Adicione produtos antes de continuar.");
+    if (!email || !name) {
+      toast.error("Por favor, preencha todos os campos");
       return;
     }
 
-    if (!email) {
-      toast.error("Por favor, forneça um e-mail.");
+    if (cart.length === 0) {
+      toast.error("Seu carrinho está vazio");
       return;
     }
 
     setIsProcessing(true);
     try {
-      const result = await createSessionMutation.mutateAsync({
-        items: cart.map((item) => ({
-          productId: item.productId,
-          quantity: item.quantity,
-        })),
-        email,
-        name,
-      });
-
-      if (result.sessionUrl) {
-        window.open(result.sessionUrl, "_blank");
-        toast.success("Redirecionando para o pagamento...");
-      }
+      // Simular redirecionamento para checkout
+      toast.success("Redirecionando para pagamento...");
+      setTimeout(() => {
+        window.location.href = "/checkout-success";
+      }, 1500);
     } catch (error) {
-      console.error("Checkout error:", error);
-      // Fallback para simulação quando TRPC falha
-      try {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        toast.success("Compra simulada com sucesso! Em um ambiente real, você seria redirecionado para o Stripe.");
-        setCart([]);
-        setLocation("/");
-      } catch (fallbackError) {
-        toast.error("Erro na compra simulada.");
-      }
+      toast.error("Erro ao processar checkout");
     } finally {
       setIsProcessing(false);
     }
@@ -141,11 +117,13 @@ export default function Checkout() {
       <header className="sticky top-0 z-50 bg-white border-b border-border">
         <div className="container flex items-center justify-between h-20">
           <div className="flex items-center gap-3">
-            <img
-              src="/images/logo_milena.png"
-              alt="Milena Arte e Cheiro"
-              className="h-12 w-auto"
-            />
+            <a href="/">
+              <img
+                src="/images/logo_milena.png"
+                alt="Milena Arte e Cheiro"
+                className="h-12 w-auto"
+              />
+            </a>
           </div>
           <nav className="hidden md:flex items-center gap-8">
             <a href="/" className="text-foreground hover:text-primary transition-colors">
@@ -158,91 +136,46 @@ export default function Checkout() {
               Contato
             </a>
           </nav>
-          <Button
-            variant="outline"
-            onClick={() => setLocation("/")}
-            className="border-border"
-          >
-            Voltar
-          </Button>
         </div>
       </header>
 
-      <div className="container py-12">
-        <h1 className="text-4xl font-bold text-foreground mb-8">Carrinho de Compras</h1>
+      {/* Checkout Section */}
+      <section className="py-12 lg:py-16">
+        <div className="container">
+          <h1 className="text-4xl font-playfair font-bold text-foreground mb-12">
+            Carrinho de Compras
+          </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Produtos Disponíveis */}
-          <div className="lg:col-span-2">
-            <Card className="p-6 mb-8">
-              <h2 className="text-2xl font-semibold text-foreground mb-6">
-                Produtos Disponíveis
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {Object.entries(PRODUCTS).map(([id, product]) => (
-                  <div
-                    key={id}
-                    className="border border-border rounded-lg p-4 hover:shadow-lg transition-shadow"
-                  >
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-48 object-cover rounded-lg mb-4"
-                    />
-                    <h3 className="font-semibold text-foreground mb-2">
-                      {product.name}
-                    </h3>
-                    <p className="text-lg font-bold text-primary mb-4">
-                      R$ {(product.price / 100).toFixed(2)}
-                    </p>
-                    <Button
-                      onClick={() => addToCart(id)}
-                      className="w-full bg-primary hover:bg-primary/90 text-foreground"
-                    >
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      Adicionar ao Carrinho
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </div>
-
-          {/* Resumo do Carrinho */}
-          <div className="lg:col-span-1">
-            <Card className="p-6 sticky top-24">
-              <h2 className="text-2xl font-semibold text-foreground mb-6">
-                Resumo do Pedido
-              </h2>
-
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Cart Items */}
+            <div className="lg:col-span-2">
               {cart.length === 0 ? (
-                <p className="text-foreground/60 text-center py-8">
-                  Seu carrinho está vazio
-                </p>
+                <Card className="p-8 text-center">
+                  <ShoppingCart className="w-12 h-12 text-foreground/40 mx-auto mb-4" />
+                  <p className="text-foreground/60 mb-4">Seu carrinho está vazio</p>
+                  <Button onClick={() => setLocation("/catalog")} className="bg-primary hover:bg-primary/90">
+                    Continuar Comprando
+                  </Button>
+                </Card>
               ) : (
-                <>
-                  <div className="space-y-4 mb-6 max-h-96 overflow-y-auto">
-                    {cart.map((item) => (
-                      <div
-                        key={item.productId}
-                        className="flex items-center justify-between border-b border-border pb-4"
-                      >
-                        <div className="flex-1">
-                          <p className="font-semibold text-foreground">
-                            {item.name}
-                          </p>
-                          <p className="text-sm text-foreground/60">
-                            R$ {(item.price / 100).toFixed(2)} x {item.quantity}
-                          </p>
-                        </div>
+                <div className="space-y-4">
+                  {cart.map((item) => (
+                    <Card key={item.productId} className="p-4 flex gap-4">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-24 h-24 object-cover rounded"
+                      />
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-foreground">{item.name}</h3>
+                        <p className="text-sm text-foreground/60 mb-2">
+                          R$ {(item.price / 100).toFixed(2)} cada
+                        </p>
                         <div className="flex items-center gap-2">
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() =>
-                              updateQuantity(item.productId, item.quantity - 1)
-                            }
-                            className="h-8 w-8 p-0"
+                            onClick={() => updateQuantity(item.productId, item.quantity - 1)}
                           >
                             <Minus className="w-4 h-4" />
                           </Button>
@@ -250,10 +183,7 @@ export default function Checkout() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() =>
-                              updateQuantity(item.productId, item.quantity + 1)
-                            }
-                            className="h-8 w-8 p-0"
+                            onClick={() => updateQuantity(item.productId, item.quantity + 1)}
                           >
                             <Plus className="w-4 h-4" />
                           </Button>
@@ -261,102 +191,122 @@ export default function Checkout() {
                             variant="ghost"
                             size="sm"
                             onClick={() => removeFromCart(item.productId)}
-                            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                            className="ml-auto text-red-500 hover:text-red-700"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
                       </div>
-                    ))}
-                  </div>
-
-                  <div className="border-t border-border pt-4 mb-6">
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-lg font-semibold text-foreground">
-                        Total:
-                      </span>
-                      <span className="text-2xl font-bold text-primary">
-                        {totalFormatted}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Formulário de Contato */}
-                  <div className="space-y-4 mb-6">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">
-                        Nome *
-                      </label>
-                      <input
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Seu nome"
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-2">
-                        E-mail *
-                      </label>
-                      <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="seu@email.com"
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={handleCheckout}
-                    disabled={isProcessing || cart.length === 0}
-                    className="w-full bg-primary hover:bg-primary/90 text-foreground py-3 text-base"
-                  >
-                    {isProcessing ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Processando...
-                      </>
-                    ) : (
-                      "Ir para Pagamento"
-                    )}
-                  </Button>
-                </>
+                      <div className="text-right">
+                        <p className="font-semibold text-foreground">
+                          R$ {((item.price * item.quantity) / 100).toFixed(2)}
+                        </p>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
               )}
-            </Card>
+            </div>
+
+            {/* Order Summary */}
+            <div>
+              <Card className="p-6 sticky top-24">
+                <h2 className="text-xl font-semibold text-foreground mb-6">Resumo do Pedido</h2>
+
+                {/* Customer Info */}
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <label className="text-sm font-medium text-foreground">Nome</label>
+                    <Input
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Seu nome"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-foreground">E-mail</label>
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="seu@email.com"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+
+                {/* Price Breakdown */}
+                <div className="space-y-2 border-t border-border pt-4 mb-6">
+                  <div className="flex justify-between text-foreground/70">
+                    <span>Subtotal</span>
+                    <span>R$ {(subtotal / 100).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-foreground/70">
+                    <span>Frete</span>
+                    <span>R$ {(shipping / 100).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between font-semibold text-foreground text-lg pt-2 border-t border-border">
+                    <span>Total</span>
+                    <span>R$ {(total / 100).toFixed(2)}</span>
+                  </div>
+                </div>
+
+                {/* Checkout Button */}
+                <Button
+                  onClick={handleCheckout}
+                  disabled={cart.length === 0 || isProcessing}
+                  className="w-full bg-primary hover:bg-primary/90 text-foreground"
+                >
+                  {isProcessing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Processando...
+                    </>
+                  ) : (
+                    "Finalizar Compra"
+                  )}
+                </Button>
+
+                {/* Continue Shopping */}
+                <Button
+                  variant="outline"
+                  onClick={() => setLocation("/catalog")}
+                  className="w-full mt-2"
+                >
+                  Continuar Comprando
+                </Button>
+              </Card>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Footer */}
-      <footer className="bg-muted border-t border-border mt-12">
-        <div className="container py-12">
+      <footer className="bg-muted py-12 mt-16">
+        <div className="container">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
-              <h4 className="font-semibold text-foreground mb-4">
-                Milena Arte e Cheiro
-              </h4>
-              <p className="text-sm text-foreground/60">
-                Sabões e velas artesanais feitos com amor e dedicação.
+              <h4 className="font-semibold text-foreground mb-4">Sobre</h4>
+              <p className="text-foreground/70 text-sm">
+                Milena Arte e Cheiro Ltda. - Produtos artesanais feitos com amor e ingredientes naturais.
               </p>
             </div>
             <div>
-              <h4 className="font-semibold text-foreground mb-4">Links</h4>
-              <ul className="space-y-2 text-sm text-foreground/60">
+              <h4 className="font-semibold text-foreground mb-4">Links Rápidos</h4>
+              <ul className="space-y-2 text-sm">
                 <li>
-                  <a href="/catalog" className="hover:text-primary transition-colors">
+                  <a href="/" className="text-foreground/70 hover:text-primary transition-colors">
+                    Home
+                  </a>
+                </li>
+                <li>
+                  <a href="/catalog" className="text-foreground/70 hover:text-primary transition-colors">
                     Catálogo
                   </a>
                 </li>
                 <li>
-                  <a href="/" className="hover:text-primary transition-colors">
-                    Sobre
-                  </a>
-                </li>
-                <li>
-                  <a href="/contact" className="hover:text-primary transition-colors">
+                  <a href="/contact" className="text-foreground/70 hover:text-primary transition-colors">
                     Contato
                   </a>
                 </li>
@@ -364,15 +314,15 @@ export default function Checkout() {
             </div>
             <div>
               <h4 className="font-semibold text-foreground mb-4">Contato</h4>
-              <p className="text-sm text-foreground/60">
-                Email: milena.maaf@gmail.com
+              <p className="text-foreground/70 text-sm">
+                E-mail: milena.maaf@gmail.com<br />
+                WhatsApp: +55 61 99147-9201<br />
+                Águas Claras, Brasília - DF
               </p>
             </div>
           </div>
-          <div className="border-t border-border pt-8">
-            <p className="text-center text-sm text-foreground/50">
-              © 2026 Milena Arte e Cheiro Ltda. Todos os direitos reservados.
-            </p>
+          <div className="border-t border-border pt-8 text-center text-sm text-foreground/60">
+            <p>&copy; 2026 Milena Arte e Cheiro Ltda. Todos os direitos reservados.</p>
           </div>
         </div>
       </footer>
