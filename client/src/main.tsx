@@ -37,6 +37,12 @@ queryClient.getMutationCache().subscribe(event => {
   }
 });
 
+// Processar query string do GitHub Pages SPA routing
+if (typeof window !== 'undefined' && window.location.search.startsWith('/?')) {
+  const path = window.location.search.slice(1).split('&')[0].replace('~and~', '&');
+  window.history.replaceState(null, '', path);
+}
+
 const trpcClient = trpc.createClient({
   links: [
     httpBatchLink({
